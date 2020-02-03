@@ -41,9 +41,9 @@ timeouts = np.array( [0.1, 1, 2, 5] )
 # Try checking for timeout every 10 iterations
 spacing = 10
 
-result = np.zeros( len( timeouts ), 4 )
+result = np.zeros( (len( timeouts ), 4) )
 
-for i in len( timeouts ):
+for i in range( len( timeouts ) ):
 	to = timeouts[i]
 	avgObj = 0
 	avgDist = 0
