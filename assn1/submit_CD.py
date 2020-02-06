@@ -2,6 +2,7 @@ import numpy as np
 import random as rnd
 import time as tm
 
+from matplotlib import pyplot as plt
 # SUBMIT YOUR CODE AS A SINGLE PYTHON (.PY) FILE INSIDE A ZIP ARCHIVE
 # THE NAME OF THE PYTHON FILE MUST BE SUBMIT.PY
 # DO NOT INCLUDE PACKAGES LIKE SKLEARN, SCIPY, KERAS ETC IN YOUR CODE
@@ -104,6 +105,7 @@ def solver(X, y, timeout, spacing):
     B = 100
     stepFunc = stepLengthGenerator( "linear", eta )
     w = np.ones((d,))
+    objValseries = []
 ################################
 # Non Editable Region Starting #
 ################################
@@ -113,7 +115,7 @@ def solver(X, y, timeout, spacing):
             toc = tm.perf_counter()
             totTime = totTime + (toc - tic)
             if totTime > timeout:
-                return (w, totTime)
+                return (w, totTime, objValseries)
             else:
                 tic = tm.perf_counter()
 ################################
@@ -121,6 +123,7 @@ def solver(X, y, timeout, spacing):
 ################################
         g = LassoGD(X, y, w)
         w = w-stepFunc(t)*g
+        objValseries = np.append(objValseries,getObjValue(X,y,w))
     # Write all code to perform your method updates here within the infinite while loop
     # The infinite loop will terminate once timeout is reached
     # Do not try to bypass the timer check e.g. by using continue
@@ -137,17 +140,19 @@ def solver(X, y, timeout, spacing):
     # In this scheme, w plays the role of the "cumulative" variable in the course module optLib
     # w_run on the other hand, plays the role of the "theta" variable in the course module optLib
 
-    return (w, totTime)  # This return statement will never be reached
+    return (w, totTime, objValseries)  # This return statement will never be reached
 
 traindata = np.loadtxt( "train" )
 # wAst = np.loadtxt( "wAstTest" )
 k = 20
-
+# objValseries = []
 y = traindata[:,0]
 X = traindata[:,1:]
-(w,totTime)=solver(X,y,5,10)
+(w,totTime,objValseries)=solver(X,y,1,10)
 print (w)
 wsparse_idx = np.argsort( np.abs(w) )[::-1][:20]
 print (wsparse_idx)
 norm1 = np.linalg.norm(w,1)
 print (norm1)
+plt.plot(objValseries)
+plt.show()
