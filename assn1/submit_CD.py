@@ -74,13 +74,12 @@ def coordinateGenerator(mode, d):
 # For example, functions to calculate next coordinate or step length
 def LassoGD(X, y, wHat):
     res = X.dot(wHat)-y
-    GradL = np.sum(sign(wHat))+2*X_.T.dot(res)
+    GradL = np.sum(np.sign(wHat))+2*X.T.dot(res)
     return GradL
 
 
 def getObjValue(X, y, wHat):
-    lassoLoss = np.linalg.norm(
-        wHat, 1) + pow(np.linalg.norm(X.dot(wHat) - y, 2), 2)
+    lassoLoss = np.linalg.norm(wHat, 1) + pow(np.linalg.norm(X.dot(wHat) - y, 2), 2)
     return lassoLoss
 ################################
 # Non Editable Region Starting #
@@ -101,10 +100,10 @@ def solver(X, y, timeout, spacing):
     # You may reinitialize w to your liking here
     # You may also define new variables here e.g. step_length, mini-batch size etc
 
-	eta = 5e-3
-	B = 100
-	stepFunc = stepLengthGenerator( "linear", eta )
-	w = np.ones((d,))
+    eta = 5e-3
+    B = 100
+    stepFunc = stepLengthGenerator( "linear", eta )
+    w = np.ones((d,))
 ################################
 # Non Editable Region Starting #
 ################################
@@ -120,8 +119,8 @@ def solver(X, y, timeout, spacing):
 ################################
 #  Non Editable Region Ending  #
 ################################
-    g = LassoGD(X, y, w)
-    w = w-stepFunc(t)*g
+        g = LassoGD(X, y, w)
+        w = w-stepFunc(t)*g
     # Write all code to perform your method updates here within the infinite while loop
     # The infinite loop will terminate once timeout is reached
     # Do not try to bypass the timer check e.g. by using continue
@@ -139,3 +138,16 @@ def solver(X, y, timeout, spacing):
     # w_run on the other hand, plays the role of the "theta" variable in the course module optLib
 
     return (w, totTime)  # This return statement will never be reached
+
+traindata = np.loadtxt( "train" )
+# wAst = np.loadtxt( "wAstTest" )
+k = 20
+
+y = traindata[:,0]
+X = traindata[:,1:]
+(w,totTime)=solver(X,y,5,10)
+print (w)
+wsparse_idx = np.argsort( np.abs(w) )[::-1][:20]
+print (wsparse_idx)
+norm1 = np.linalg.norm(w,1)
+print (norm1)
