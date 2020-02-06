@@ -75,7 +75,7 @@ def coordinateGenerator(mode, d):
 # For example, functions to calculate next coordinate or step length
 def LassoGD(X, y, wHat):
     res = X.dot(wHat)-y
-    GradL = np.sum(np.sign(wHat))+2*X.T.dot(res)
+    GradL = (np.sign(wHat))+2*X.T.dot(res)
     return GradL
 
 
@@ -104,7 +104,7 @@ def solver(X, y, timeout, spacing):
     eta = 5e-3
     B = 100
     stepFunc = stepLengthGenerator( "linear", eta )
-    w = np.ones((d,))
+    # w = np.ones((d,))
     objValseries = []
 ################################
 # Non Editable Region Starting #
@@ -122,7 +122,11 @@ def solver(X, y, timeout, spacing):
 #  Non Editable Region Ending  #
 ################################
         g = LassoGD(X, y, w)
-        w = w-stepFunc(t)*g
+        u = w-stepFunc(t)*g
+        # v = np.sign(w)
+        # w = w-stepFunc(t)*g
+        w = (np.sign(u))*(np.max(abs(u),0))
+        # w = u - v
         objValseries = np.append(objValseries,getObjValue(X,y,w))
     # Write all code to perform your method updates here within the infinite while loop
     # The infinite loop will terminate once timeout is reached
@@ -148,7 +152,7 @@ k = 20
 # objValseries = []
 y = traindata[:,0]
 X = traindata[:,1:]
-(w,totTime,objValseries)=solver(X,y,1,10)
+(w,totTime,objValseries)=solver(X,y,10,10)
 print (w)
 wsparse_idx = np.argsort( np.abs(w) )[::-1][:20]
 print (wsparse_idx)
@@ -156,3 +160,4 @@ norm1 = np.linalg.norm(w,1)
 print (norm1)
 plt.plot(objValseries)
 plt.show()
+# print (np.sign(w))
