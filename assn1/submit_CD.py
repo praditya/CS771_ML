@@ -74,7 +74,7 @@ def coordinateGenerator(mode, d):
 # For example, functions to calculate next coordinate or step length
 def LassoGD(X, y, wHat):
     res = X.dot(wHat)-y
-    GradL = sign(wHat)+2*X_.T.dot(res)
+    GradL = np.sum(sign(wHat))+2*X_.T.dot(res)
     return GradL
 
 
@@ -102,7 +102,7 @@ def solver(X, y, timeout, spacing):
     # You may also define new variables here e.g. step_length, mini-batch size etc
 
 	eta = 5e-3
-	B=100
+	B = 100
 	stepFunc = stepLengthGenerator( "linear", eta )
 	w = np.ones((d,))
 ################################
