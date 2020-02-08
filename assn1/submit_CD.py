@@ -39,7 +39,7 @@ def getCyclicCoord(state):
 
 def getRandCoord(state):
     d = state
-    curr = random.randint(0, d - 1)
+    curr = rnd.randint(0, d - 1)
     state = d
     return (curr, state)
 
@@ -103,24 +103,27 @@ def DoProxGD(X,y,w,stepFunc,t):
     w = prox*wp
     return w
 
-def DoCD(X,y,w,StepFunc,t,d,n):
-    s = coordinateGenerator("random", d)
+def DoCD(X,y,w,StepFunc,t):
     alpha = 1
+    (n, d) = X.shape
     z  = np.sum(X**2,axis=0)
     for j in range(d):
-        pho = 0
-        for i in range(n):
-            if i!=j:
-                pho = pho + X[i][j]*(y[i]-y[i]*w[j])
-            else:
-                pho = pho + X[i][j]*y[i]
+        # pho = 0
+        Xj = X[:,j]
+        res = y-X.dot(w)+w[j]*Xj
+        pho = Xj.T.dot(res)
+        # for i in range(n):
+        #     if i!=j:
+        #         pho = pho + X[i][j]*(y[i]-y[i]*w[j])
+        #     else:
+        #         pho = pho + X[i][j]*y[i]
         # if pho < -alpha/2:
         #     w[j] = (pho + alpha/2)/z[j]
         # elif pho > alpha/2:
         #     w[j] = (pho - alpha/2)/z[j]
         # else:
         #     w[j] = 0
-        g = -2*pho + 2*w[j]*z[j]+np.sign(w[j])
+        g = -2*pho + 2*w[j]*z[j]+alpha*np.sign(w[j])
         w[j] = w[j]-StepFunc(t)*g 
     return w     
     # gt =
@@ -151,12 +154,17 @@ def solver(X, y, timeout, spacing):
     # You may also define new variables here e.g. step_length, mini-batch size etc
     # eta = 5e-3
     # takes time around 10
-    eta = 1e-2
+    
+    # eta = 0.01
+    # above value and quadratic for GD
     # allowed to take such large step?
-
+    
+    # eta = 0.5
+    # above value and linear for CD 
+    
     B = 100
     # GD works well with quadratic step function
-    stepFunc = stepLengthGenerator( "quadratic", eta )
+    stepFunc = stepLengthGenerator( "linear", eta )
 
     # coordinateGenerator(mode, d)
 
@@ -180,7 +188,7 @@ def solver(X, y, timeout, spacing):
 
         # w = DoGD(X,y,w,stepFunc,t)
         # w = DoProxGD(X,y,w,stepFunc,t)
-        w = DoCD(X,y,w,stepFunc,t,d,n)
+        w = DoCD(X,y,w,stepFunc,t)
         objValseries = np.append(objValseries,getObjValue(X,y,w))
     # Write all code to perform your method updates here within the infinite while loop
     # The infinite loop will terminate once timeout is reached
