@@ -16,7 +16,7 @@ def getSupportError( wHat, wAst, k ):
 	idxAst = np.abs( wAst ).argsort()[::-1][:k]
 	# Find the k coordinates with largest values (absolute terms) in the learnt model
 	idxHat = np.abs( wHat ).argsort()[::-1][:k]
-	
+
 	# Set up indicator arrays to find the diff between the two
 	# Could have used Python's set difference function here as well
 	a = np.zeros_like( wAst )

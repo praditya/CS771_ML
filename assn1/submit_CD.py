@@ -79,15 +79,17 @@ def LassoGD(X, y, wHat):
     return GradL
 
 def Softhreshold(w):
-    alpha = 1
+    alpha = 5e-3
+    # alpha = stepLengthGenerator( "linear", eta )
+    prox = np.zeros((len(w),))
     for i in range(len(w)):
         if w[i] > alpha:
-            w[i] = w[i]-alpha
+            prox[i] = w[i]-alpha
         elif w[i] < -alpha:
-            w[i]=w[i]+alpha
+            prox[i] = w[i]+alpha
         else:
-            w[i]=0
-    return w
+            prox[i] = 0
+    return prox
 
 def getObjValue(X, y, wHat):
     lassoLoss = np.linalg.norm(wHat, 1) + pow(np.linalg.norm(X.dot(wHat) - y, 2), 2)
@@ -103,17 +105,23 @@ def solver(X, y, timeout, spacing):
     totTime = 0
 
     # w is the model vector and will get returned once timeout happens
-    w = 1.5*np.ones((d,))
+    # w = 1.5*np.ones((d,))
+    w = np.zeros((d,))
     tic = tm.perf_counter()
 ################################
 #  Non Editable Region Ending  #
 ################################
     # You may reinitialize w to your liking here
     # You may also define new variables here e.g. step_length, mini-batch size etc
+    # eta = 5e-3
+    # takes time around 10
+    eta = 1e-2
+    # allowed with such large step?
 
-    eta = 5e-3
     B = 100
-    stepFunc = stepLengthGenerator( "constant", eta )
+    # GD works well with quadratic step function
+    stepFunc = stepLengthGenerator( "quadratic", eta )
+
     # coordinateGenerator(mode, d)
 
     # w = np.ones((d,))
@@ -134,11 +142,11 @@ def solver(X, y, timeout, spacing):
 #  Non Editable Region Ending  #
 ################################
         g = LassoGD(X, y, w)
-        # u = w-stepFunc(t)*g
-        Sl = Softhreshold(w)
-        res = X.dot(w)-y
-        wp = w-stepFunc(t)*X.T.dot(res)
-        w = Sl*(wp)
+        w = w-stepFunc(t)*g
+        # prox = Softhreshold(w)
+        # res = X.dot(w)-y
+        # wp = w-stepFunc(t)*X.T.dot(res)
+        # w = prox*wp
         # v = np.sign(w)
         # w = w-stepFunc(t)*g
         # w = (np.sign(u))*(np.max(abs(u),0))
@@ -163,17 +171,29 @@ def solver(X, y, timeout, spacing):
     return (w, totTime, objValseries)  # This return statement will never be reached
 
 traindata = np.loadtxt( "train" )
-# wAst = np.loadtxt( "wAstTest" )
+wAst = np.loadtxt( "wAstTrain" )
 k = 20
 # objValseries = []
 y = traindata[:,0]
 X = traindata[:,1:]
 (w,totTime,objValseries)=solver(X,y,10,10)
-print (w)
+# print (w)
+
+ObjValBest = getObjValue(X,y,wAst)
+
 wsparse_idx = np.argsort( np.abs(w) )[::-1][:20]
-print (wsparse_idx)
-norm1 = np.linalg.norm(w,1)
-print (norm1)
-plt.plot(objValseries)
-plt.show()
-# print (np.sign(w))
+# removing the remaining indices from w
+# w1 = w
+# np.put(w1,wsparse_idx,np.zeros(20))
+#
+# wsparse = w - w1
+# print (w,w1,wsparse)
+
+norm1 = np.linalg.norm(w,2)
+normBest = np.linalg.norm(wAst,2)
+print (normBest,norm1)
+print (ObjValBest,objValseries[-1])
+
+# Plot the objective value function
+# plt.plot(objValseries)
+# plt.show()
