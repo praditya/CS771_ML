@@ -103,9 +103,11 @@ def DoProxGD(X,y,w,stepFunc,t):
     w = prox*wp
     return w
 
-def DoCD(X,y,w,StepFunc,t):
-
-
+def DoCD(X,y,w,StepFunc,t,d):
+    s = coordinateGenerator("random", d)
+    gt =
+    w[i]=w[i]-StepFunc(t)*gt
+    np.put(w,i,w[i])
     return w
 
 def getObjValue(X, y, wHat):
@@ -133,7 +135,7 @@ def solver(X, y, timeout, spacing):
     # eta = 5e-3
     # takes time around 10
     eta = 1e-2
-    # allowed with such large step?
+    # allowed to take such large step?
 
     B = 100
     # GD works well with quadratic step function
@@ -161,6 +163,7 @@ def solver(X, y, timeout, spacing):
 
         w = DoGD(X,y,w,stepFunc,t)
         # w = DoProxGD(X,y,w,stepFunc,t)
+        # w = DoCD(X,y,w,stepFunc,t)
         objValseries = np.append(objValseries,getObjValue(X,y,w))
     # Write all code to perform your method updates here within the infinite while loop
     # The infinite loop will terminate once timeout is reached
