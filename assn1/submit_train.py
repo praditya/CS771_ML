@@ -91,7 +91,7 @@ def getObjValue(X, y, wHat):
 ################################
 
 
-def solver(X, y, timeout, spacing):
+def solver(X, y, timeout, spacing, eta):
     (n, d) = X.shape
     t = 0
     totTime = 0
@@ -111,8 +111,10 @@ def solver(X, y, timeout, spacing):
     # eta = 0.01
     # above value and quadratic for GD
     # allowed to take such large step?
-    eta = 0.376
+    
+    # eta = 0.32
     # above value and linear for CD 
+    
     B = 100
     # GD works well with quadratic step function
     stepFunc = stepLengthGenerator( "linear", eta )
@@ -159,7 +161,10 @@ def solver(X, y, timeout, spacing):
 
     return (w, totTime, objValseries)  # This return statement will never be reached
 
-
+N = 100
+eta = np.linspace(0.1,0.6,N)
+# # eta = [0.5]
+# eta = [0.376]
 traindata = np.loadtxt( "train" )
 wAst = np.loadtxt( "wAstTrain" )
 k = 20
@@ -169,27 +174,51 @@ X = traindata[:,1:]
 
 ObjValBest = getObjValue(X,y,wAst)
 
-(w,totTime,objValseries)=solver(X,y,0.1,10)
-# print (w)
-wsparse_idx = np.argsort( np.abs(w) )[::-1][:20]
-w2 = w[wsparse_idx]
-    
-wreduce_idx = np.argsort( np.abs(w) )[0:799]
-w[wreduce_idx] = 0
-ObjCal = getObjValue(X,y,w)
-    
-norm1 = np.linalg.norm(w,2)
-normBest = np.linalg.norm(wAst,2)
-    
-idxAst = np.abs(wAst).argsort()[::-1][:k]
-idxHat = np.abs(w).argsort()[::-1][:k]
-a = np.zeros_like( wAst )
-a[idxAst] = 1
-b = np.zeros_like( wAst )
-b[idxHat] = 1
-diff_ind = np.linalg.norm( a - b, 1 )//2
+# Tuning eta
+min1 = 1000
+min2 = 1000
 
-print (diff_ind,ObjCal)
+for i in range(N):
+    
+    (w,totTime,objValseries)=solver(X,y,0.1,10,eta[i])
+# print (w)
+    wsparse_idx = np.argsort( np.abs(w) )[::-1][:20]
+    w2 = w[wsparse_idx]
+    
+    wreduce_idx = np.argsort( np.abs(w) )[0:799]
+    w[wreduce_idx] = 0
+    ObjCal = getObjValue(X,y,w)
+# removing the remaining indices from w
+# w1 = w
+# np.put(w1,wsparse_idx,np.zeros(20))
+#
+# wsparse = w - w1
+# print (w,w1,wsparse)
+    
+    norm1 = np.linalg.norm(w,2)
+    normBest = np.linalg.norm(wAst,2)
+    
+    if np.abs(ObjValBest-ObjCal) < min1:
+        min1 =  np.abs(ObjValBest-ObjCal)
+        eta_cr_o = eta[i]
+        ObjCal1 = ObjCal
+    
+    if np.abs(norm1 - normBest) < min2:
+        min2 = np.abs(norm1 - normBest)
+        eta_cr = eta[i]
+    
+    idxAst = np.abs(wAst).argsort()[::-1][:k]
+    idxHat = np.abs(w).argsort()[::-1][:k]
+    a = np.zeros_like( wAst )
+    a[idxAst] = 1
+    b = np.zeros_like( wAst )
+    b[idxHat] = 1
+    min3 = np.linalg.norm( a - b, 1 )//2
+    # print (normBest,norm1)
+    # print (ObjValBest,objValseries[-1])
+    print (i)
+
+print (eta_cr,eta_cr_o,min1,min2,min3,ObjCal1)
 
 # Plot the objective value function
 # plt.plot(objValseries)
