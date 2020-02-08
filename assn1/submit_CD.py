@@ -21,56 +21,6 @@ def stepLengthGenerator(mode, eta):
     elif mode == "quadratic":
         return lambda t: eta/np.sqrt(t+1)
 
-# For cyclic mode, the state is a tuple of the current coordinate and the number of dimensions
-
-
-def getCyclicCoord(state):
-    curr = state[0]
-    d = state[1]
-    if curr >= d - 1 or curr < 0:
-        curr = 0
-    else:
-        curr += 1
-    state = (curr, d)
-    return (curr, state)
-
-# For random mode, the state is the number of dimensions
-
-
-def getRandCoord(state):
-    d = state
-    curr = rnd.randint(0, d - 1)
-    state = d
-    return (curr, state)
-
-# For randperm mode, the state is a tuple of the random permutation and the current index within that permutation
-
-
-def getRandpermCoord(state):
-    idx = state[0]
-    perm = state[1]
-    d = len(perm)
-    if idx >= d - 1 or idx < 0:
-        idx = 0
-        perm = np.random.permutation(d)
-    else:
-        idx += 1
-    state = (idx, perm)
-    curr = perm[idx]
-    return (curr, state)
-
-# Get functions that offer various coordinate selection schemes
-
-
-def coordinateGenerator(mode, d):
-    if mode == "cyclic":
-        return (getCyclicCoord, (0, d))
-    elif mode == "random":
-        return (getRandCoord, d)
-    elif mode == "randperm":
-        return (getRandpermCoord, (0, np.random.permutation(d)))
-
-
 # You may define any new functions, variables, classes here
 # For example, functions to calculate next coordinate or step length
 def LassoGD(X, y, wHat):
@@ -107,8 +57,11 @@ def DoCD(X,y,w,StepFunc,t):
     alpha = 1
     (n, d) = X.shape
     z  = np.sum(X**2,axis=0)
+    # used 'a' for random permutation CD 
+    a = np.random.permutation(d)
     for j in range(d):
         # pho = 0
+        j = a[j]
         Xj = X[:,j]
         res = y-X.dot(w)+w[j]*Xj
         pho = Xj.T.dot(res)
@@ -159,7 +112,7 @@ def solver(X, y, timeout, spacing):
     # above value and quadratic for GD
     # allowed to take such large step?
     
-    # eta = 0.5
+    eta = 0.32
     # above value and linear for CD 
     
     B = 100
@@ -214,12 +167,13 @@ k = 20
 # objValseries = []
 y = traindata[:,0]
 X = traindata[:,1:]
-(w,totTime,objValseries)=solver(X,y,10,10)
+(w,totTime,objValseries)=solver(X,y,0.1,10)
 # print (w)
 
 ObjValBest = getObjValue(X,y,wAst)
 
 wsparse_idx = np.argsort( np.abs(w) )[::-1][:20]
+w2 = w[wsparse_idx]
 # removing the remaining indices from w
 # w1 = w
 # np.put(w1,wsparse_idx,np.zeros(20))
@@ -227,7 +181,7 @@ wsparse_idx = np.argsort( np.abs(w) )[::-1][:20]
 # wsparse = w - w1
 # print (w,w1,wsparse)
 
-norm1 = np.linalg.norm(w,2)
+norm1 = np.linalg.norm(w2,2)
 normBest = np.linalg.norm(wAst,2)
 print (normBest,norm1)
 print (ObjValBest,objValseries[-1])
@@ -235,3 +189,5 @@ print (ObjValBest,objValseries[-1])
 # Plot the objective value function
 plt.plot(objValseries)
 plt.show()
+
+# bJw9dPi8bZPSCTM
