@@ -103,12 +103,29 @@ def DoProxGD(X,y,w,stepFunc,t):
     w = prox*wp
     return w
 
-def DoCD(X,y,w,StepFunc,t,d):
+def DoCD(X,y,w,StepFunc,t,d,n):
     s = coordinateGenerator("random", d)
-    gt =
-    w[i]=w[i]-StepFunc(t)*gt
-    np.put(w,i,w[i])
-    return w
+    alpha = 1
+    z  = np.sum(X**2,axis=0)
+    for j in range(d):
+        pho = 0
+        for i in range(n):
+            if i!=j:
+                pho = pho + X[i][j]*(y[i]-y[i]*w[j])
+            else:
+                pho = pho + X[i][j]*y[i]
+        # if pho < -alpha/2:
+        #     w[j] = (pho + alpha/2)/z[j]
+        # elif pho > alpha/2:
+        #     w[j] = (pho - alpha/2)/z[j]
+        # else:
+        #     w[j] = 0
+        g = -2*pho + 2*w[j]*z[j]+np.sign(w[j])
+        w[j] = w[j]-StepFunc(t)*g 
+    return w     
+    # gt =
+    # w[i]=w[i]-StepFunc(t)*gt
+    # np.put(w,i,w[i])
 
 def getObjValue(X, y, wHat):
     lassoLoss = np.linalg.norm(wHat, 1) + pow(np.linalg.norm(X.dot(wHat) - y, 2), 2)
@@ -161,9 +178,9 @@ def solver(X, y, timeout, spacing):
 #  Non Editable Region Ending  #
 ################################
 
-        w = DoGD(X,y,w,stepFunc,t)
+        # w = DoGD(X,y,w,stepFunc,t)
         # w = DoProxGD(X,y,w,stepFunc,t)
-        # w = DoCD(X,y,w,stepFunc,t)
+        w = DoCD(X,y,w,stepFunc,t,d,n)
         objValseries = np.append(objValseries,getObjValue(X,y,w))
     # Write all code to perform your method updates here within the infinite while loop
     # The infinite loop will terminate once timeout is reached
@@ -208,5 +225,5 @@ print (normBest,norm1)
 print (ObjValBest,objValseries[-1])
 
 # Plot the objective value function
-# plt.plot(objValseries)
-# plt.show()
+plt.plot(objValseries)
+plt.show()
