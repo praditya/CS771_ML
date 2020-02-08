@@ -78,10 +78,10 @@ def LassoGD(X, y, wHat):
     GradL = (np.sign(wHat))+2*X.T.dot(res)
     return GradL
 
-def Softhreshold(w):
-    alpha = 5e-3
+def Softhreshold(w,stepFunc,t):
+    alpha = stepFunc(t)
     # alpha = stepLengthGenerator( "linear", eta )
-    prox = np.zeros((len(w),))
+    prox = np.zeros_like(w)
     for i in range(len(w)):
         if w[i] > alpha:
             prox[i] = w[i]-alpha
@@ -90,6 +90,23 @@ def Softhreshold(w):
         else:
             prox[i] = 0
     return prox
+
+def DoGD(X,y,w,stepFunc,t):
+    g = LassoGD(X, y, w)
+    w = w-stepFunc(t)*g
+    return w
+
+def DoProxGD(X,y,w,stepFunc,t):
+    prox = Softhreshold(w,stepFunc,t)
+    res = X.dot(w)-y
+    wp = w-stepFunc(t)*X.T.dot(res)
+    w = prox*wp
+    return w
+
+def DoCD(X,y,w,StepFunc,t):
+
+
+    return w
 
 def getObjValue(X, y, wHat):
     lassoLoss = np.linalg.norm(wHat, 1) + pow(np.linalg.norm(X.dot(wHat) - y, 2), 2)
@@ -141,16 +158,9 @@ def solver(X, y, timeout, spacing):
 ################################
 #  Non Editable Region Ending  #
 ################################
-        g = LassoGD(X, y, w)
-        w = w-stepFunc(t)*g
-        # prox = Softhreshold(w)
-        # res = X.dot(w)-y
-        # wp = w-stepFunc(t)*X.T.dot(res)
-        # w = prox*wp
-        # v = np.sign(w)
-        # w = w-stepFunc(t)*g
-        # w = (np.sign(u))*(np.max(abs(u),0))
-        # w = u - v
+
+        w = DoGD(X,y,w,stepFunc,t)
+        # w = DoProxGD(X,y,w,stepFunc,t)
         objValseries = np.append(objValseries,getObjValue(X,y,w))
     # Write all code to perform your method updates here within the infinite while loop
     # The infinite loop will terminate once timeout is reached
