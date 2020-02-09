@@ -109,7 +109,7 @@ def sg(X,y,w,t):
     value=2*((X.T)@(X@w-y))+np.sign(w)
     return value
 
-# Function for subgradient descent
+# Function for Proximal Gradient descent---Don't go by name
 def SubGD(X,y,w):
   tol=.001
   w_f=w
@@ -119,18 +119,12 @@ def SubGD(X,y,w):
   eta_t=1/pow(t,1/2)
   n=X.shape[0]
   while diff>tol:
-  
-    # g=sg(X,y,w,t)
-    # print(t)
     g=sg(X,y,w,t)
     eta_t=.1/pow(t,1/2)
     w_new=soft_threshold(w-eta_t*g,eta_t)
-    # print(w_new)
     w_f=np.vstack((w,w_new))
-    # w_new=np.mean(w_f,axis=0)
     print (getObjValue(X,y,w_new))
     diff=getObjValue( X, y, w )-getObjValue( X, y, w_new )
-    # print(diff)
     a=w
     w=w_new
     t=t+1
