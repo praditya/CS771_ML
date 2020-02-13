@@ -192,7 +192,7 @@ diff_ind = np.linalg.norm( a - b, 1 )//2
 print (diff_ind,ObjCal)
 
 # Plot the objective value function
-# plt.plot(objValseries)
-# plt.show()
+plt.plot(objValseries)
+plt.show()
 
 # bJw9dPi8bZPSCTM
