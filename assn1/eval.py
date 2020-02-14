@@ -25,8 +25,12 @@ def getSupportError( wHat, wAst, k ):
 	b[idxHat] = 1
 	return np.linalg.norm( a - b, 1 )//2
 
-Z = np.loadtxt( "test" )
-wAst = np.loadtxt( "wAstTest" )
+# Z = np.loadtxt( "test" )
+# wAst = np.loadtxt( "wAstTest" )
+Z = np.loadtxt( "train" )
+wAst = np.loadtxt( "wAstTrain" )
+
+
 k = 20
 
 y = Z[:,0]

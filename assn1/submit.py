@@ -13,6 +13,42 @@ import time as tm
 
 # You may define any new functions, variables, classes here
 # For example, functions to calculate next coordinate or step length
+def stepLengthGenerator(mode, eta):
+    if mode == "constant":
+        return lambda t: eta
+    elif mode == "linear":
+        return lambda t: eta/(t+1)
+    elif mode == "quadratic":
+        return lambda t: eta/np.sqrt(t+1)
+
+def normalGD(X, y, w):
+    value=2*((X.T)@(X@w-y))
+    return value
+
+def Softhreshold(w,StepFunc,t):
+    alpha = StepFunc(t)
+    # alpha = stepLengthGenerator( "linear", eta )
+    prox = np.zeros_like(w)
+    for i in range(len(w)):
+        if w[i] > alpha:
+            prox[i] = w[i]-alpha
+        elif w[i] < -alpha:
+            prox[i] = w[i]+alpha
+        else:
+            prox[i] = 0
+    return prox
+
+def DoGD(X,y,w,stepFunc,t):
+    g = LassoGD(X, y, w)
+    w = w-stepFunc(t)*g
+    return w
+
+def DoProxGD(X,y,w,StepFunc,t):
+    g=normalGD(X,y,w)
+    alpha = StepFunc(t)
+    w_new=Softhreshold(w-alpha*g,StepFunc,t)
+    return w_new
+
 
 ################################
 # Non Editable Region Starting #
@@ -31,7 +67,8 @@ def solver( X, y, timeout, spacing ):
 
 	# You may reinitialize w to your liking here
 	# You may also define new variables here e.g. step_length, mini-batch size etc
-
+	eta = 0.089
+	stepFunc = stepLengthGenerator( "constant", eta )
 ################################
 # Non Editable Region Starting #
 ################################
@@ -52,7 +89,7 @@ def solver( X, y, timeout, spacing ):
 		# The infinite loop will terminate once timeout is reached
 		# Do not try to bypass the timer check e.g. by using continue
 		# It is very easy for us to detect such bypasses which will be strictly penalized
-		
+		w = DoProxGD(X,y,w,stepFunc,t)
 		# Please note that once timeout is reached, the code will simply return w
 		# Thus, if you wish to return the average model (as is sometimes done for GD),
 		# you need to make sure that w stores the average at all times
