@@ -38,6 +38,32 @@ def Softhreshold(w,StepFunc,t):
             prox[i] = 0
     return prox
 
+def LassoGD(X, y, wHat):
+    res = X.dot(wHat)-y
+    GradL = (np.sign(wHat))+2*X.T.dot(res)
+    return GradL
+
+def DoCD(X,y,w,StepFunc,t):
+    alpha = 1
+    (n, d) = X.shape
+    (n, d) = X.shape
+    z  = np.sum(X**2,axis=0)
+    # used 'a' for random permutation CD 
+    a = np.random.permutation(d)
+    for j in range(d):
+        j = a[j]
+        Xj = X[:,j]   
+        res = y-X.dot(w)+w[j]*Xj
+        pho = Xj.T.dot(res)
+
+        if pho < -alpha/2:
+            w[j] = (pho + alpha/2)/z[j]
+        elif pho > alpha/2:
+            w[j] = (pho - alpha/2)/z[j]
+        else:
+            w[j] = 0
+    return w 
+
 def DoGD(X,y,w,stepFunc,t):
     g = LassoGD(X, y, w)
     w = w-stepFunc(t)*g
@@ -68,7 +94,9 @@ def solver( X, y, timeout, spacing ):
 	# You may reinitialize w to your liking here
 	# You may also define new variables here e.g. step_length, mini-batch size etc
 	eta = 0.089
+	# eta = 0.12
 	stepFunc = stepLengthGenerator( "constant", eta )
+	# stepFunc = stepLengthGenerator( "quadratic", eta )
 ################################
 # Non Editable Region Starting #
 ################################
@@ -89,7 +117,11 @@ def solver( X, y, timeout, spacing ):
 		# The infinite loop will terminate once timeout is reached
 		# Do not try to bypass the timer check e.g. by using continue
 		# It is very easy for us to detect such bypasses which will be strictly penalized
+		
 		w = DoProxGD(X,y,w,stepFunc,t)
+		# w = DoGD(X,y,w,stepFunc,t)
+		# w = DoGD(X,y,w,stepFunc,t)
+
 		# Please note that once timeout is reached, the code will simply return w
 		# Thus, if you wish to return the average model (as is sometimes done for GD),
 		# you need to make sure that w stores the average at all times
