@@ -2,11 +2,16 @@ import utils
 import predict
 import time as tm
 import numpy as np
+from sklearn.model_selection import cross_val_score
+from sklearn.tree import DecisionTreeClassifier as DTC
 
 # This file is intended to demonstrate how we would evaluate your code
 # The data loader needs to know how many feature dimensions are there
 dictSize = 225
 (X, y) = utils.loadData( "train", dictSize = dictSize )
+
+clf = DTC(random_state=0)
+cross_val_score(clf, X, y, cv=2)
 
 # Get error class predictions from predict.py and time the thing
 tic = tm.perf_counter()
