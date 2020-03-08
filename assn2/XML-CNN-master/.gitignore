@@ -1,0 +1,6 @@
+*saved_models
+datasets
+*.npy
+*.npz
+*.pyc
+embedding_weights/*
