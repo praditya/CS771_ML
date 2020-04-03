@@ -27,7 +27,7 @@ parser.add_argument('--loss', dest='loss_type', type=str, default="BCELoss", hel
 parser.add_argument('--hidden_dims', type=int, default=512, help='hidden layer dimension')
 parser.add_argument('--sequence_length',help='max sequence length of a document', type=int,default=500)
 parser.add_argument('--embedding_dim', help='dimension of word embedding representation', type=int, default=300)
-parser.add_argument('--model_variation', help='model variation: CNN-rand or CNN-pretrain', type=str, default='pretrain')
+parser.add_argument('--model_variation', help='model variation: CNN-rand or CNN-pretrain', type=str, default='CNN-rand')
 parser.add_argument('--pretrain_type', help='pretrain model: GoogleNews or glove', type=str, default='glove')
 parser.add_argument('--vocab_size', help='size of vocabulary keeping the most frequent words', type=int, default=30000)
 parser.add_argument('--drop_prob', help='Dropout probability', type=int, default=.3)
